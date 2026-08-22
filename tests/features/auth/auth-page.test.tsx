@@ -8,5 +8,6 @@ describe('AuthPage', () => {
     expect(screen.getByText('SIGN IN')).toBeInTheDocument();
     expect(screen.getByLabelText('手机号')).toBeInTheDocument();
     expect(screen.getByLabelText('密码')).toBeInTheDocument();
+    expect(screen.getByText('用户')).toBeInTheDocument();
   });
 });

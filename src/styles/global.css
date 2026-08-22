@@ -18,3 +18,6 @@ button, input, textarea { font: inherit; }
 .floating-shapes i:nth-child(4) { width: 72px; height: 72px; left: 42px; top: 250px; background: #f3cddd; animation-delay: -6s; }
 @keyframes float { 50% { transform: translate3d(8px, -10px, 0) scale(1.04); } }
 @media (prefers-reduced-motion: reduce) { .floating-shapes i { animation: none; } }
+@keyframes screenEnter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.auth-screen, .editor-screen, .sealing-screen, .sealing-animation, .memory-desk, .reader-screen { animation: screenEnter .62s cubic-bezier(.22,.7,.18,1) both; }
+@media (prefers-reduced-motion: reduce) { .auth-screen, .editor-screen, .sealing-screen, .sealing-animation, .memory-desk, .reader-screen, .home-logo, .home-topbar > button, .home-copy, .home-envelope, .start-button { animation-duration: .01ms; animation-delay: 0s; } }

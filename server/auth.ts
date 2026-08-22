@@ -34,3 +34,10 @@ export function rotateRecovery(db: Database.Database, phone: string, code: strin
   db.prepare('UPDATE users SET recovery_hash = ? WHERE id = ?').run(hashSecret(next), user.id);
   return next;
 }
+
+export function ensureDemoUser(db: Database.Database) {
+  const phone = '13800138000';
+  const existing = db.prepare('SELECT id FROM users WHERE phone = ?').get(phone) as { id: number } | undefined;
+  if (existing) return existing.id;
+  return register(db, phone, 'temlore2026').id;
+}
