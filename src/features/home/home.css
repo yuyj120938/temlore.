@@ -1,0 +1,26 @@
+.home-screen, .intro-screen { min-height: 100svh; border-radius: 0; background: #fff; }
+.home-screen .mobile-status, .intro-screen .mobile-status { color: var(--ink); }
+.home-topbar { position: absolute; z-index: 5; top: 58px; left: 20px; right: 20px; display: flex; align-items: center; justify-content: space-between; }
+.icon-button { width: 40px; height: 40px; border: 1px solid rgba(24,26,23,.12); border-radius: 50%; background: rgba(255,255,255,.74); color: var(--ink); cursor: pointer; }
+.home-logo { display: flex; align-items: center; font: 600 16px Georgia, serif; }
+.home-copy { position: absolute; z-index: 4; top: 166px; left: 24px; }
+.home-copy small { font-size: 9px; letter-spacing: .2em; }
+.home-copy h1 { margin: 11px 0 0; font: 600 clamp(53px, 14vw, 66px)/.83 Arial, sans-serif; letter-spacing: -.08em; }
+.home-copy h1 em { font: 400 .48em/1 Georgia, serif; letter-spacing: -.04em; }
+.home-copy p { margin-top: 15px; font: 400 18px Georgia, serif; }
+.home-envelope { position: absolute; z-index: 5; top: 364px; left: 46px; right: 46px; height: 138px; border: 1px solid #d7c6a7; border-radius: 9px; background: #fbf4e4; transform: rotate(-6deg); box-shadow: 0 20px 30px rgba(64,53,32,.16); }
+.home-envelope::before { content: ''; position: absolute; inset: 0; clip-path: polygon(0 0, 50% 58%, 100% 0); background: #eadbc4; }
+.home-envelope .blue-seal { position: absolute; z-index: 2; left: 50%; top: 67px; transform: translate(-50%,-50%); }
+.start-button { position: absolute; z-index: 6; left: 20px; right: 20px; bottom: 24px; height: 66px; border: 0; border-radius: 24px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; background: #181a17; color: #fff; cursor: pointer; }
+.start-button span { font: 500 22px Georgia, serif; }
+.start-button i { width: 33px; height: 33px; border-radius: 50%; display: grid; place-items: center; background: var(--wax); color: #22313a; font-style: normal; }
+.intro-screen { display: grid; place-items: center; }
+.intro-wax-drop { position: absolute; z-index: 3; top: 37%; left: 50%; width: 22px; height: 34px; border-radius: 50% 50% 58% 58%; transform: translateX(-50%); background: var(--wax); animation: waxDrop .8s ease-in forwards; }
+.intro-stamp { position: absolute; z-index: 4; top: 39%; left: 50%; transform: translate(-50%,-50%) scale(.7); opacity: 0; animation: stampIn .75s 0.75s cubic-bezier(.2,.8,.2,1) forwards; }
+.intro-logo { position: relative; z-index: 5; display: flex; align-items: center; font: 600 clamp(44px, 14vw, 64px) Georgia, serif; letter-spacing: -.06em; opacity: 0; animation: logoReveal 1s 1.45s ease-out forwards; }
+.intro-logo > span { display: inline-flex; margin: 0 2px; }
+.intro-logo .blue-seal { width: .58em; height: .58em; font-size: .34em; }
+@keyframes waxDrop { 0% { transform: translate(-50%,-40px) scale(.6); opacity: 0; } 25% { opacity: 1; } 100% { transform: translate(-50%,0) scale(1); opacity: 1; } }
+@keyframes stampIn { 0% { opacity: 0; transform: translate(-50%, -25%) scale(.7); } 45% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes logoReveal { from { opacity: 0; transform: translateY(14px); letter-spacing: .15em; } to { opacity: 1; transform: translateY(0); letter-spacing: -.06em; } }
+@media (prefers-reduced-motion: reduce) { .intro-wax-drop, .intro-stamp, .intro-logo { animation: none; opacity: 1; transform: none; } }
