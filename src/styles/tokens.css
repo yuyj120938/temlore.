@@ -6,4 +6,6 @@
   --desk: #e8e1d5;
   --desk-mid: #c9c0b3;
   --desk-deep: #a79d90;
+  --page-radius: 46px;
+  --shadow-paper: 0 18px 42px rgba(66, 56, 34, .14);
 }
