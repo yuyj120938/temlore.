@@ -19,6 +19,7 @@
     "tsx": "latest"
   },
   "devDependencies": {
+    "@playwright/test": "latest",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "@types/better-sqlite3": "latest",
