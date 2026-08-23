@@ -168,3 +168,65 @@ Use a 393 × 852 Playwright viewport at `http://127.0.0.1:4173/`. Verify the Hom
 git add src/features/sealing/SealingAnimation.tsx src/features/sealing/sealing-animation.css tests/e2e/letter-lifecycle.spec.ts
 git commit -m "feat: store sealed letters in opening drawer"
 ```
+
+### Task 5: Phone-scoped letters and final letter snapshots
+
+**Files:**
+- Create: `src/features/letters/letterStorage.ts`
+- Modify: `src/app/App.tsx`
+- Modify: `src/features/auth/AuthPage.tsx`
+- Modify: `src/features/editor/draftStorage.ts`
+- Modify: `src/features/editor/LetterEditor.tsx`
+- Modify: `src/features/reading/LetterReader.tsx`
+- Test: `tests/features/letters/letter-storage.test.ts`
+
+- [ ] Write a failing test proving two phone numbers have independent empty/history states and that a finalized letter round-trips body, font, photos, dimensions, and positions.
+- [ ] Run `pnpm exec vitest run tests/features/letters/letter-storage.test.ts` and confirm the storage module is missing.
+- [ ] Add phone-keyed draft and letter storage, derive the active phone from `temlore.session`, save the complete editor snapshot on finish, and clear only that phone's draft after the sealing animation completes.
+- [ ] Render finalized photos and font in `LetterReader`, then rerun the focused test and existing app tests.
+- [ ] Commit with `git commit -m "feat: scope complete letters by phone"`.
+
+### Task 6: Long-paper scrolling and photo positioning
+
+**Files:**
+- Modify: `src/features/editor/draftStorage.ts`
+- Modify: `src/features/editor/LetterEditor.tsx`
+- Modify: `src/features/editor/editor.css`
+- Test: `tests/features/editor/editor.test.tsx`
+
+- [ ] Write failing tests for restored `x`/`y` photo coordinates and pointer-drag position updates.
+- [ ] Run the focused editor tests and confirm failure on the missing position fields/behavior.
+- [ ] Add a photo drag mode on the photo body while preserving two-pointer pinch; clamp `x` and `y` to the white paper's content area and persist them.
+- [ ] Let the paper grow with content and the editor screen scroll vertically while keeping the toolbar fixed.
+- [ ] Run editor tests and commit with `git commit -m "feat: move photos across long letters"`.
+
+### Task 7: Temlore calendar popover
+
+**Files:**
+- Create: `src/features/sealing/CalendarPopover.tsx`
+- Modify: `src/features/sealing/TimeRing.tsx`
+- Modify: `src/features/sealing/sealing.css`
+- Test: `tests/features/sealing/calendar-popover.test.tsx`
+- Test: `tests/features/sealing/time-ring.test.tsx`
+
+- [ ] Write failing tests for opening the custom calendar, month navigation, blue selected day, hour/minute inputs, cancel, and confirm.
+- [ ] Run the focused sealing tests and confirm failure because the native datetime input remains.
+- [ ] Implement a dependency-free Gregorian calendar grid with Monday-first headings, adjacent-month blanks, purple rounded panel, blue selected day, month controls, and native-like numeric hour/minute controls.
+- [ ] Connect its confirmed ISO-like local value to `TimeRing` and remove the native `datetime-local` input.
+- [ ] Run sealing tests and commit with `git commit -m "feat: add Temlore calendar picker"`.
+
+### Task 8: Immediate Start return and mobile regression QA
+
+**Files:**
+- Modify: `src/components/MobileFrame.tsx`
+- Modify: `src/features/sealing/SealingAnimation.tsx`
+- Modify: `src/features/sealing/sealing-animation.css`
+- Modify: `src/app/App.tsx`
+- Test: `tests/features/app/persistent-flow.test.tsx`
+- Test: `tests/e2e/letter-lifecycle.spec.ts`
+
+- [ ] Write failing assertions that Home hides its mock `9:41` status and sealing completion returns directly after drawer closure with no closing message.
+- [ ] Implement a Home-only status-time hide option and remove the sealing end message/delay.
+- [ ] Run `pnpm test -- --run`, `pnpm build`, and `pnpm exec playwright test`.
+- [ ] Perform 393 × 852 visual QA for empty new-phone history, custom calendar, long editor scroll, moved/finalized photo restoration, and immediate Start return. Save screenshots outside the repo.
+- [ ] Commit with `git commit -m "feat: finalize mobile letter lifecycle"`.
