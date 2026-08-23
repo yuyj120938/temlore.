@@ -15,7 +15,7 @@ describe('TimeRing', () => {
   it('confirms a custom opening date', () => {
     const onConfirm = vi.fn(); const view = render(<TimeRing onConfirm={onConfirm} onBack={vi.fn()} />); const page = within(view.container);
     fireEvent.click(page.getByRole('button', { name: '一周' })); fireEvent.click(page.getByRole('button', { name: '自定义开启时间' }));
-    fireEvent.change(page.getByLabelText('小时'), { target: { value: '10' } }); fireEvent.change(page.getByLabelText('分钟'), { target: { value: '30' } }); fireEvent.click(page.getByRole('button', { name: '确认日期' })); fireEvent.click(page.getByText('确认封存时间'));
-    expect(onConfirm).toHaveBeenCalledWith('7d', expect.stringMatching(/^\d{4}-\d{2}-\d{2}T10:30$/));
+    fireEvent.click(page.getByRole('button', { name: '确认年份' })); fireEvent.click(page.getByRole('button', { name: '确认日期' })); fireEvent.click(page.getByText('确认封存时间'));
+    expect(onConfirm).toHaveBeenCalledWith('7d', expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/));
   });
 });

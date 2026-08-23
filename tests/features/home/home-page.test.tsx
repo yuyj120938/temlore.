@@ -1,4 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { HomePage } from '../../../src/features/home/HomePage';
 
@@ -20,5 +22,13 @@ describe('HomePage account entry', () => {
     expect(page.queryByText(/点击查看/)).not.toBeInTheDocument();
     fireEvent.click(page.getByRole('button', { name: /2026/ }));
     expect(onOpenLetter).toHaveBeenCalledOnce();
+  });
+
+  it('keeps the arrived envelope moving on an instant home return', () => {
+    render(<HomePage onStart={vi.fn()} onAccount={vi.fn()} arrived instant />);
+    expect(screen.getByRole('button', { name: '打开抽屉' })).toHaveClass('arrived');
+    const styles = readFileSync(join(process.cwd(), 'src/features/home/home.css'), 'utf8');
+    expect(styles).toContain('.home-screen.instant .home-envelope:not(.arrived)');
+    expect(styles).toMatch(/\.home-screen\.instant \.home-envelope\.arrived\s*\{[^}]*animation:[^}]*envelopePulse/);
   });
 });
