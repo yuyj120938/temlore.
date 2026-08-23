@@ -23,4 +23,12 @@ describe('LetterEditor', () => {
     fireEvent.click(page.getByRole('button', { name: '返回' }));
     expect(onBack).toHaveBeenCalledOnce();
   });
+
+  it('restores photo position and exposes a draggable photo surface on a scrolling paper', () => {
+    localStorage.setItem('temlore.draft', JSON.stringify({ body: '很长的信\n'.repeat(80), font: 'songti', photos: [{ url: 'data:image/png;base64,AAAA', caption: '', scale: 1, width: 180, height: 190, x: 24, y: 36 }] }));
+    const view = render(<LetterEditor onDone={vi.fn()} />); const page = within(view.container);
+    expect(page.getByTestId('draggable-photo')).toHaveStyle({ transform: 'translate(24px, 36px) rotate(-2deg)' });
+    expect(page.getByLabelText('移动照片1')).toHaveAttribute('data-draggable', 'true');
+    expect(page.getByLabelText('信件正文')).toHaveStyle({ overflow: 'hidden' });
+  });
 });
