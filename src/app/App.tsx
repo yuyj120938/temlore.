@@ -31,7 +31,6 @@ export function App() {
 
   const completeIntro = useCallback(() => setIntro(false), []);
   const arrivedLetter = letters.find((letter) => letter.arrived);
-  const latestLetter = letters[0];
 
   if (intro) return <IntroAnimation onComplete={completeIntro} />;
   if (auth) return <AuthPage onSuccess={() => { const activePhone = getActivePhone(); setPhone(activePhone); setLetters(loadLetters(activePhone)); setAuth(false); }} onBack={() => setAuth(false)} />;
@@ -46,5 +45,5 @@ export function App() {
   if (sealed) return <SealingAnimation onComplete={() => { clearDraft(); setPendingDraft(null); setInstantHome(true); setSealed(false); }} />;
   if (reading && selectedLetter) return <LetterReader letter={selectedLetter} onClose={() => { setReading(false); setDesk(false); }} />;
   if (desk) return <MemoryDesk onOpen={() => { if (arrivedLetter) { setSelectedLetter(arrivedLetter); setReading(true); } }} />;
-  return <HomePage instant={instantHome} arrived={Boolean(arrivedLetter)} writtenAt={latestLetter?.writtenAt} onOpenLetter={() => { if (latestLetter) { setSelectedLetter(latestLetter); setReading(true); } }} onDrawer={() => { if (arrivedLetter) setDesk(true); }} onStart={() => { setInstantHome(false); phone ? setEditor(true) : setAuth(true); }} onAccount={() => setAuth(true)} />;
+  return <HomePage instant={instantHome} arrived={Boolean(arrivedLetter)} writtenAt={arrivedLetter?.writtenAt} onOpenLetter={() => { if (arrivedLetter) { setSelectedLetter(arrivedLetter); setReading(true); } }} onDrawer={() => { if (arrivedLetter) setDesk(true); }} onStart={() => { setInstantHome(false); phone ? setEditor(true) : setAuth(true); }} onAccount={() => setAuth(true)} />;
 }

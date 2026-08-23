@@ -21,6 +21,7 @@ export function saveLetter(phone: string, letter: StoredLetter) {
 }
 
 export function markArrived(phone: string, now = Date.now()) {
+  if (!phone) return [];
   const letters = loadLetters(phone).map((letter) => letter.unlockAt <= now ? { ...letter, arrived: true } : letter);
   localStorage.setItem(letterKey(phone), JSON.stringify(letters));
   return letters;

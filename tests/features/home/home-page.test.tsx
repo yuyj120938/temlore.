@@ -7,6 +7,7 @@ describe('HomePage account entry', () => {
     render(<HomePage onStart={vi.fn()} onAccount={vi.fn()} />);
     expect(screen.getByRole('button', { name: 'Sign' })).toBeInTheDocument();
     expect(screen.queryByText('人')).not.toBeInTheDocument();
+    expect(screen.queryByText('9:41')).not.toBeInTheDocument();
   });
 
   it('slides saved letter times over the start page and opens the letter directly', () => {
