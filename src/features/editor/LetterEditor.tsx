@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { loadDraft, saveDraft } from './draftStorage';
 import {
-  bodyFromBlocks,
   emptyDraft,
   insertPhotoAtCaret,
   removePhotoBlock,
@@ -17,7 +16,7 @@ type Corner = 'nw' | 'ne' | 'sw' | 'se';
 type ResizeState = { id: string; corner: Corner; x: number; y: number; width: number; height: number };
 type DragState = { id: string; pointerId: number; startX: number; alignX: number; minX: number; maxX: number };
 
-export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft: EditorDraft) => void; onBack?: () => void }) {
+export function LetterEditor({ onDone, onBack }: { onDone: (draft: EditorDraft) => void; onBack?: () => void }) {
   const stored = useRef(loadDraft() ?? emptyDraft());
   const [font, setFont] = useState<DraftFont>(stored.current.font);
   const [blocks, setBlocks] = useState<LetterBlock[]>(stored.current.blocks);
@@ -176,7 +175,7 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft:
     <header className="editor-top"><button aria-label="返回" onClick={onBack}>←</button><span>{saved ? 'DRAFT SAVED' : 'SAVING…'}</span></header>
     <article ref={paper} className={`letter-paper ${font}`} onClick={(event) => { if (event.target === event.currentTarget) focusLastText(); }}>
       <small>{now}</small><h1>Dear future me,</h1>
-      <div className="letter-flow">
+      <div className="letter-flow" data-testid="letter-flow" onClick={(event) => { if (event.target === event.currentTarget) focusLastText(); }}>
         {blocks.map((block) => {
           if (block.type === 'text') {
             textIndex += 1;
@@ -187,7 +186,7 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft:
               className="letter-block-text"
               aria-label={label}
               value={block.text}
-              onChange={(event) => updateText(block.id, event.target.value)}
+              onChange={(event) => { updateText(block.id, event.target.value); rememberCaret(block.id, event.currentTarget); }}
               onFocus={(event) => rememberCaret(block.id, event.currentTarget)}
               onClick={(event) => rememberCaret(block.id, event.currentTarget)}
               onSelect={(event) => rememberCaret(block.id, event.currentTarget)}
@@ -212,6 +211,6 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft:
       </div>
     </article>
     <input ref={fileInput} hidden type="file" accept="image/*" aria-label="上传照片" onChange={onFile} />
-    <nav className="editor-toolbar" aria-label="写信工具栏"><button onClick={() => setFont(font === 'songti' ? 'kaiti' : 'songti')}>{font === 'songti' ? '宋体' : '楷体'}</button><button onClick={choosePhoto}>▧ 照片</button><button className="editor-done" onClick={() => onDone(bodyFromBlocks(blocks), { font, blocks })}>✓</button></nav>
+    <nav className="editor-toolbar" aria-label="写信工具栏"><button onClick={() => setFont(font === 'songti' ? 'kaiti' : 'songti')}>{font === 'songti' ? '宋体' : '楷体'}</button><button onClick={choosePhoto}>▧ 照片</button><button className="editor-done" onClick={() => onDone({ font, blocks })}>✓</button></nav>
   </main>;
 }

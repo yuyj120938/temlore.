@@ -21,7 +21,7 @@ describe('LetterEditor', () => {
     fireEvent.click(page.getByText('宋体')); expect(page.getByText('楷体')).toBeInTheDocument();
     expect(page.getByLabelText('上传照片')).toBeInTheDocument();
     fireEvent.click(page.getByText('✓'));
-    expect(done).toHaveBeenCalledWith('新的信', expect.objectContaining({
+    expect(done).toHaveBeenCalledWith(expect.objectContaining({
       font: 'kaiti',
       blocks: [expect.objectContaining({ type: 'text', text: '新的信' })],
     }));
@@ -51,7 +51,7 @@ describe('LetterEditor', () => {
     expect(page.getByLabelText('文字段落2')).toHaveFocus();
     fireEvent.change(page.getByLabelText('文字段落2'), { target: { value: '照片下面的新文字' } });
     fireEvent.click(page.getByText('✓'));
-    expect(done.mock.calls[0][1].blocks.map((block: { type: string }) => block.type)).toEqual(['text', 'photo', 'text']);
+    expect(done.mock.calls[0][0].blocks.map((block: { type: string }) => block.type)).toEqual(['text', 'photo', 'text']);
   });
 
   it('deletes a photo and reconnects the surrounding text', () => {
@@ -77,5 +77,13 @@ describe('LetterEditor', () => {
     expect(page.getByLabelText('水平移动照片1')).toHaveAttribute('data-axis', 'x');
     expect(page.getByRole('button', { name: '调整照片1se' })).toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem('temlore.draft.guest') || '{}').blocks[1]).not.toHaveProperty('y');
+  });
+
+  it('focuses the last text block when the blank writing area is tapped', () => {
+    const view = render(<LetterEditor onDone={vi.fn()} />); const page = within(view.container);
+    const text = page.getByLabelText('文字段落1');
+    expect(text).not.toHaveFocus();
+    fireEvent.click(page.getByTestId('letter-flow'));
+    expect(text).toHaveFocus();
   });
 });

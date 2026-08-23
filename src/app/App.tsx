@@ -34,7 +34,7 @@ export function App() {
 
   if (intro) return <IntroAnimation onComplete={completeIntro} />;
   if (auth) return <AuthPage onSuccess={() => { const activePhone = getActivePhone(); setPhone(activePhone); setLetters(loadLetters(activePhone)); setAuth(false); }} onBack={() => setAuth(false)} />;
-  if (editor) return <LetterEditor onBack={() => { setInstantHome(true); setEditor(false); }} onDone={(_, draft) => { setPendingDraft(draft); setEditor(false); setSealing(true); }} />;
+  if (editor) return <LetterEditor onBack={() => { setInstantHome(true); setEditor(false); }} onDone={(draft) => { setPendingDraft(draft); setEditor(false); setSealing(true); }} />;
   if (sealing) return <TimeRing onBack={() => { setSealing(false); setEditor(true); }} onConfirm={(duration, customDate) => {
     if (!pendingDraft || !phone) return;
     const delays = { '10s': 10_000, '7d': 604_800_000, '6mo': 15_768_000_000, '1y': 31_536_000_000 };
