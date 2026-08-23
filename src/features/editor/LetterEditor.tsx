@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState, type ChangeEvent, type PointerEvent as ReactPointerEvent } from 'react';
-import { loadDraft, saveDraft, type DraftFont, type DraftPhoto } from './draftStorage';
+import { loadDraft, saveDraft, type DraftFont, type DraftPhoto, type EditorDraft } from './draftStorage';
 import './editor.css';
 
 const initialBody = '今天的风很轻，我突然想把这一刻留给未来的你。\n\n希望你打开这封信时，仍记得此刻的勇气与期待。';
 type Corner = 'nw' | 'ne' | 'sw' | 'se';
 type ResizeState = { index: number; corner: Corner; x: number; y: number; width: number; height: number };
 
-export function LetterEditor({ onDone, onBack }: { onDone: (body: string) => void; onBack?: () => void }) {
+export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft: EditorDraft) => void; onBack?: () => void }) {
   const stored = useRef(loadDraft());
   const [body, setBody] = useState(stored.current?.body ?? initialBody);
   const [font, setFont] = useState<DraftFont>(stored.current?.font ?? 'songti');
-  const [photos, setPhotos] = useState<DraftPhoto[]>(stored.current?.photos ?? []);
+  const [photos, setPhotos] = useState<DraftPhoto[]>((stored.current?.photos ?? []).map((photo) => ({ ...photo, x: photo.x ?? 0, y: photo.y ?? 0 })));
   const [saved, setSaved] = useState(true);
   const fileInput = useRef<HTMLInputElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -28,7 +28,7 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string) => voi
   function choosePhoto() { fileInput.current?.click(); }
   function onFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]; if (!file || photos.length >= 9) return;
-    const reader = new FileReader(); reader.onload = () => setPhotos((items) => [...items, { url: String(reader.result), caption: '', scale: 1, width: 188, height: 190 }]); reader.readAsDataURL(file); e.target.value = '';
+    const reader = new FileReader(); reader.onload = () => setPhotos((items) => [...items, { url: String(reader.result), caption: '', scale: 1, width: 188, height: 190, x: 0, y: 0 }]); reader.readAsDataURL(file); e.target.value = '';
   }
   function startResize(e: ReactPointerEvent<HTMLButtonElement>, index: number, corner: Corner) {
     e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); const photo = photos[index];
@@ -50,5 +50,5 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string) => voi
   function endPointer(e: ReactPointerEvent) { touches.current.delete(e.pointerId); if (touches.current.size < 2) pinch.current = null; resize.current = null; }
 
   const now = new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false }).toUpperCase();
-  return <main className="editor-screen"><header className="editor-top"><button aria-label="返回" onClick={onBack}>←</button><span>{saved ? 'DRAFT SAVED' : 'SAVING…'}</span></header><article className={`letter-paper ${font}`}><small>{now}</small><h1>Dear future me,</h1><textarea aria-label="信件正文" value={body} onChange={(e) => setBody(e.target.value)} />{photos.map((photo, index) => <figure className="polaroid resizable-photo" key={index} style={{ width: photo.width, height: photo.height }} onPointerMove={moveResize} onPointerUp={endPointer}><div className="photo-placeholder" onPointerDown={(e) => startPinch(e, index)} onPointerMove={movePinch} onPointerUp={endPointer} onPointerCancel={endPointer}><img src={photo.url} alt={`照片${index + 1}`} style={{ transform: `scale(${photo.scale})` }} /></div><input aria-label={`照片${index + 1}说明`} value={photo.caption} onChange={(e) => updatePhoto(index, { caption: e.target.value })} placeholder="写一句照片说明" />{(['nw','ne','sw','se'] as Corner[]).map((corner) => <button key={corner} type="button" className={`resize-handle ${corner}`} aria-label={`调整照片${index + 1}${corner}`} onPointerDown={(e) => startResize(e, index, corner)} onPointerUp={endPointer} />)}</figure>)}</article><input ref={fileInput} hidden type="file" accept="image/*" aria-label="上传照片" onChange={onFile} /><nav className="editor-toolbar" aria-label="写信工具栏"><button onClick={() => setFont(font === 'songti' ? 'kaiti' : 'songti')}>{font === 'songti' ? '宋体' : '楷体'}</button><button onClick={choosePhoto}>▧ 照片</button><button className="editor-done" onClick={() => onDone(body)}>✓</button></nav></main>;
+  return <main className="editor-screen"><header className="editor-top"><button aria-label="返回" onClick={onBack}>←</button><span>{saved ? 'DRAFT SAVED' : 'SAVING…'}</span></header><article className={`letter-paper ${font}`}><small>{now}</small><h1>Dear future me,</h1><textarea aria-label="信件正文" value={body} onChange={(e) => setBody(e.target.value)} />{photos.map((photo, index) => <figure className="polaroid resizable-photo" key={index} style={{ width: photo.width, height: photo.height, transform: `translate(${photo.x}px, ${photo.y}px) rotate(-2deg)` }} onPointerMove={moveResize} onPointerUp={endPointer}><div className="photo-placeholder" onPointerDown={(e) => startPinch(e, index)} onPointerMove={movePinch} onPointerUp={endPointer} onPointerCancel={endPointer}><img src={photo.url} alt={`照片${index + 1}`} style={{ transform: `scale(${photo.scale})` }} /></div><input aria-label={`照片${index + 1}说明`} value={photo.caption} onChange={(e) => updatePhoto(index, { caption: e.target.value })} placeholder="写一句照片说明" />{(['nw','ne','sw','se'] as Corner[]).map((corner) => <button key={corner} type="button" className={`resize-handle ${corner}`} aria-label={`调整照片${index + 1}${corner}`} onPointerDown={(e) => startResize(e, index, corner)} onPointerUp={endPointer} />)}</figure>)}</article><input ref={fileInput} hidden type="file" accept="image/*" aria-label="上传照片" onChange={onFile} /><nav className="editor-toolbar" aria-label="写信工具栏"><button onClick={() => setFont(font === 'songti' ? 'kaiti' : 'songti')}>{font === 'songti' ? '宋体' : '楷体'}</button><button onClick={choosePhoto}>▧ 照片</button><button className="editor-done" onClick={() => onDone(body, { body, font, photos })}>✓</button></nav></main>;
 }

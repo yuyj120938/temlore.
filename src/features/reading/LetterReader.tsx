@@ -1,4 +1,7 @@
 import { BlueSeal } from '../../components/BlueSeal';
-export function LetterReader({ onClose }: { onClose: () => void }) {
-  return <main className="reader-screen"><header><button onClick={onClose}>←</button><span>LETTER OPENED</span><button>•••</button></header><article><small>01 JAN 2026 · ARRIVED</small><h1>Dear future me,</h1><p>今天的风很轻，我突然想把这一刻留给未来的你。</p><p>希望你打开这封信时，仍记得此刻的勇气与期待。</p><div className="reader-seal"><BlueSeal variant="stamp" /></div></article></main>;
+import type { StoredLetter } from '../letters/letterStorage';
+
+export function LetterReader({ onClose, letter }: { onClose: () => void; letter: StoredLetter }) {
+  const date = new Date(letter.writtenAt).toLocaleString('zh-CN');
+  return <main className="reader-screen"><header><button onClick={onClose}>←</button><span>LETTER OPENED</span><i /></header><article className={letter.font}><small>{date} · ARRIVED</small><h1>Dear future me,</h1>{letter.body.split('\n').filter(Boolean).map((line, index) => <p key={index}>{line}</p>)}{letter.photos.map((photo, index) => <figure className="reader-photo" key={index} style={{ width: photo.width, height: photo.height, transform: `translate(${photo.x}px, ${photo.y}px) rotate(-2deg)` }}><div><img src={photo.url} alt={`信件照片${index + 1}`} style={{ transform: `scale(${photo.scale})` }} /></div>{photo.caption && <figcaption>{photo.caption}</figcaption>}</figure>)}<div className="reader-seal"><BlueSeal variant="stamp" /></div></article></main>;
 }
