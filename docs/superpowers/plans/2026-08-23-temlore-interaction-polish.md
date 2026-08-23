@@ -230,3 +230,31 @@ git commit -m "feat: store sealed letters in opening drawer"
 - [ ] Run `pnpm test -- --run`, `pnpm build`, and `pnpm exec playwright test`.
 - [ ] Perform 393 × 852 visual QA for empty new-phone history, custom calendar, long editor scroll, moved/finalized photo restoration, and immediate Start return. Save screenshots outside the repo.
 - [ ] Commit with `git commit -m "feat: finalize mobile letter lifecycle"`.
+
+### Task 9: Year-first date-only calendar
+
+**Files:**
+- Modify: `src/features/sealing/CalendarPopover.tsx`
+- Modify: `src/features/sealing/calendar.css`
+- Modify: `src/features/sealing/TimeRing.tsx`
+- Test: `tests/features/sealing/calendar-popover.test.tsx`
+- Test: `tests/features/sealing/time-ring.test.tsx`
+
+- [ ] Write a failing test asserting the dialog initially shows a vertically scrollable year list, does not show month days, and has no hour/minute inputs.
+- [ ] Write a failing test asserting selecting and confirming a year reveals the month/day grid, and confirming a day returns `YYYY-MM-DDT00:00`.
+- [ ] Run `pnpm exec vitest run tests/features/sealing/calendar-popover.test.tsx tests/features/sealing/time-ring.test.tsx` and confirm failure on the existing one-step date/time calendar.
+- [ ] Implement a two-phase `year` → `date` state, render years from current year through current year + 100 in a snapping vertical list, and center the selected year with blue styling.
+- [ ] Remove hour/minute state and controls; make date confirmation always emit local midnight.
+- [ ] Rerun focused tests and commit with `git commit -m "feat: select calendar year before date"`.
+
+### Task 10: Preserve arrived-envelope motion after instant return
+
+**Files:**
+- Modify: `src/features/home/home.css`
+- Test: `tests/features/home/home-page.test.tsx`
+
+- [ ] Write a failing rendered-style regression test or CSS assertion proving `instant arrived` keeps `envelopePulse` while other Home entry animations remain disabled.
+- [ ] Run the focused Home test and verify failure because `.home-screen.instant .home-envelope` currently disables every envelope animation.
+- [ ] Change the instant selector to disable envelope animation only when it is not arrived, and add an explicit arrived override that runs the horizontal sway without `homeReveal`.
+- [ ] Run all Vitest tests, the production build, Playwright tests, and a 393 × 852 visual check.
+- [ ] Commit with `git commit -m "fix: keep arrived envelope gently moving"`.
