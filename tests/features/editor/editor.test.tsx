@@ -65,4 +65,17 @@ describe('LetterEditor', () => {
     expect(page.queryByAltText('照片1')).not.toBeInTheDocument();
     expect(page.getByLabelText('文字段落1')).toHaveValue('上面下面');
   });
+
+  it('keeps photo resizing and horizontal movement inside the content flow', () => {
+    localStorage.setItem('temlore.draft', JSON.stringify({ font: 'songti', blocks: [
+      { id: 'a', type: 'text', text: '上面' },
+      { id: 'p', type: 'photo', url: 'data:image/png;base64,AAAA', caption: '', scale: 1.2, width: 180, height: 190, alignX: 24 },
+      { id: 'b', type: 'text', text: '下面' },
+    ] }));
+    const view = render(<LetterEditor onDone={vi.fn()} />); const page = within(view.container);
+    expect(page.getByTestId('flow-photo')).toHaveStyle({ transform: 'translateX(24px) rotate(-2deg)' });
+    expect(page.getByLabelText('水平移动照片1')).toHaveAttribute('data-axis', 'x');
+    expect(page.getByRole('button', { name: '调整照片1se' })).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem('temlore.draft.guest') || '{}').blocks[1]).not.toHaveProperty('y');
+  });
 });

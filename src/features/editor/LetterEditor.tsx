@@ -15,6 +15,7 @@ import './editor.css';
 
 type Corner = 'nw' | 'ne' | 'sw' | 'se';
 type ResizeState = { id: string; corner: Corner; x: number; y: number; width: number; height: number };
+type DragState = { id: string; pointerId: number; startX: number; alignX: number; minX: number; maxX: number };
 
 export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft: EditorDraft) => void; onBack?: () => void }) {
   const stored = useRef(loadDraft() ?? emptyDraft());
@@ -22,11 +23,15 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft:
   const [blocks, setBlocks] = useState<LetterBlock[]>(stored.current.blocks);
   const [saved, setSaved] = useState(true);
   const fileInput = useRef<HTMLInputElement>(null);
+  const paper = useRef<HTMLElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
   const textareas = useRef(new Map<string, HTMLTextAreaElement>());
   const caret = useRef<{ id: string; offset: number } | null>(null);
   const pendingFocus = useRef<string | null>(null);
   const resize = useRef<ResizeState | null>(null);
+  const drag = useRef<DragState | null>(null);
+  const touches = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ id: string; distance: number; scale: number } | null>(null);
 
   useEffect(() => {
     setSaved(false);
@@ -109,6 +114,50 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft:
 
   function endResize() { resize.current = null; }
 
+  function startPhotoGesture(event: ReactPointerEvent<HTMLDivElement>, block: PhotoBlock) {
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    touches.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const figure = event.currentTarget.parentElement?.getBoundingClientRect();
+    const paperRect = paper.current?.getBoundingClientRect();
+    if (figure && paperRect) {
+      const baseLeft = figure.left - block.alignX;
+      drag.current = {
+        id: block.id,
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        alignX: block.alignX,
+        minX: paperRect.left + 10 - baseLeft,
+        maxX: paperRect.right - 10 - baseLeft - figure.width,
+      };
+    }
+    if (touches.current.size === 2) {
+      const [a, b] = [...touches.current.values()];
+      pinch.current = { id: block.id, distance: Math.hypot(a.x - b.x, a.y - b.y), scale: block.scale };
+      drag.current = null;
+    }
+  }
+
+  function movePhotoGesture(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!touches.current.has(event.pointerId)) return;
+    touches.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pinch.current && touches.current.size === 2) {
+      const [a, b] = [...touches.current.values()];
+      const distance = Math.hypot(a.x - b.x, a.y - b.y);
+      updatePhoto(pinch.current.id, { scale: Math.max(.5, Math.min(3, pinch.current.scale * distance / Math.max(1, pinch.current.distance))) });
+      return;
+    }
+    const active = drag.current;
+    if (active?.pointerId === event.pointerId) {
+      updatePhoto(active.id, { alignX: Math.max(active.minX, Math.min(active.maxX, active.alignX + event.clientX - active.startX)) });
+    }
+  }
+
+  function endPhotoGesture(event: ReactPointerEvent<HTMLDivElement>) {
+    touches.current.delete(event.pointerId);
+    if (touches.current.size < 2) pinch.current = null;
+    if (drag.current?.pointerId === event.pointerId) drag.current = null;
+  }
+
   function focusLastText() {
     const last = [...blocks].reverse().find((block): block is TextBlock => block.type === 'text');
     if (!last) return;
@@ -125,7 +174,7 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft:
 
   return <main className="editor-screen">
     <header className="editor-top"><button aria-label="返回" onClick={onBack}>←</button><span>{saved ? 'DRAFT SAVED' : 'SAVING…'}</span></header>
-    <article className={`letter-paper ${font}`} onClick={(event) => { if (event.target === event.currentTarget) focusLastText(); }}>
+    <article ref={paper} className={`letter-paper ${font}`} onClick={(event) => { if (event.target === event.currentTarget) focusLastText(); }}>
       <small>{now}</small><h1>Dear future me,</h1>
       <div className="letter-flow">
         {blocks.map((block) => {
@@ -155,7 +204,7 @@ export function LetterEditor({ onDone, onBack }: { onDone: (body: string, draft:
             onPointerUp={endResize}
           >
             <button type="button" className="photo-delete" aria-label={`删除照片${position}`} onClick={() => setBlocks((items) => removePhotoBlock(items, block.id))}>×</button>
-            <div className="photo-placeholder"><img src={block.url} alt={`照片${position}`} style={{ transform: `scale(${block.scale})` }} /></div>
+            <div className="photo-placeholder" role="button" tabIndex={0} aria-label={`水平移动照片${position}`} data-axis="x" onPointerDown={(event) => startPhotoGesture(event, block)} onPointerMove={movePhotoGesture} onPointerUp={endPhotoGesture} onPointerCancel={endPhotoGesture}><img src={block.url} alt={`照片${position}`} style={{ transform: `scale(${block.scale})` }} /></div>
             <input aria-label={`照片${position}说明`} value={block.caption} onChange={(event) => updatePhoto(block.id, { caption: event.target.value })} placeholder="写一句照片说明" />
             {(['nw', 'ne', 'sw', 'se'] as Corner[]).map((corner) => <button key={corner} type="button" className={`resize-handle ${corner}`} aria-label={`调整照片${position}${corner}`} onPointerDown={(event) => startResize(event, block, corner)} onPointerUp={endResize} />)}
           </figure>;
