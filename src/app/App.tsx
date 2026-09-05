@@ -37,13 +37,13 @@ export function App() {
   if (editor) return <LetterEditor onBack={() => { setInstantHome(true); setEditor(false); }} onDone={(draft) => { setPendingDraft(draft); setEditor(false); setSealing(true); }} />;
   if (sealing) return <TimeRing onBack={() => { setSealing(false); setEditor(true); }} onConfirm={(duration, customDate) => {
     if (!pendingDraft || !phone) return;
-    const delays = { '10s': 10_000, '7d': 604_800_000, '6mo': 15_768_000_000, '1y': 31_536_000_000 };
+    const delays = { '10s': 10_000, '7d': 604_800_000, '3mo': 7_884_000_000, '6mo': 15_768_000_000, '1y': 31_536_000_000, '3y': 94_608_000_000, '5y': 157_680_000_000 };
     const writtenAt = new Date().toISOString(); const unlockAt = customDate ? new Date(customDate).getTime() : Date.now() + delays[duration];
     const letter: StoredLetter = { ...pendingDraft, id: `${Date.now()}`, writtenAt, unlockAt, arrived: unlockAt <= Date.now() };
     saveLetter(phone, letter); setLetters(loadLetters(phone)); setSelectedLetter(letter); setSealing(false); setSealed(true);
   }} />;
   if (sealed) return <SealingAnimation onComplete={() => { clearDraft(); setPendingDraft(null); setInstantHome(true); setSealed(false); }} />;
   if (reading && selectedLetter) return <LetterReader letter={selectedLetter} onClose={() => { setReading(false); setDesk(false); }} />;
-  if (desk) return <MemoryDesk onOpen={() => { if (arrivedLetter) { setSelectedLetter(arrivedLetter); setReading(true); } }} />;
+  if (desk) return <MemoryDesk onBack={() => setDesk(false)} onOpen={() => { if (arrivedLetter) { setSelectedLetter(arrivedLetter); setReading(true); } }} />;
   return <HomePage instant={instantHome} arrived={Boolean(arrivedLetter)} writtenAt={arrivedLetter?.writtenAt} onOpenLetter={() => { if (arrivedLetter) { setSelectedLetter(arrivedLetter); setReading(true); } }} onDrawer={() => { if (arrivedLetter) setDesk(true); }} onStart={() => { setInstantHome(false); phone ? setEditor(true) : setAuth(true); }} onAccount={() => setAuth(true)} />;
 }
