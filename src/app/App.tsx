@@ -44,6 +44,6 @@ export function App() {
   }} />;
   if (sealed) return <SealingAnimation onComplete={() => { clearDraft(); setPendingDraft(null); setInstantHome(true); setSealed(false); }} />;
   if (reading && selectedLetter) return <LetterReader letter={selectedLetter} onClose={() => { setReading(false); setDesk(false); }} />;
-  if (desk) return <MemoryDesk onBack={() => setDesk(false)} onOpen={() => { if (arrivedLetter) { setSelectedLetter(arrivedLetter); setReading(true); } }} />;
+  if (desk) return <MemoryDesk onBack={() => { setInstantHome(true); setDesk(false); }} onOpen={() => { if (arrivedLetter) { setSelectedLetter(arrivedLetter); setReading(true); } }} />;
   return <HomePage instant={instantHome} arrived={Boolean(arrivedLetter)} writtenAt={arrivedLetter?.writtenAt} onOpenLetter={() => { if (arrivedLetter) { setSelectedLetter(arrivedLetter); setReading(true); } }} onDrawer={() => { if (arrivedLetter) setDesk(true); }} onStart={() => { setInstantHome(false); phone ? setEditor(true) : setAuth(true); }} onAccount={() => setAuth(true)} />;
 }
