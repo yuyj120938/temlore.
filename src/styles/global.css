@@ -32,3 +32,4 @@ button, input, textarea { font: inherit; }
 main.sealing-screen .time-ring button{border:0;background:transparent}
 main.sealing-screen .time-ring button.selected{border:0;box-shadow:none;background:transparent}
 .sealing-screen .sealing-warning{left:30px;right:30px;bottom:108px;padding:8px 0;border:0;background:transparent}
+.home-envelope,.desk-envelope{overflow:hidden}

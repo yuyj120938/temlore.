@@ -9,7 +9,7 @@ export function IntroAnimation({ onComplete }: { onComplete: () => void }) {
     return () => window.clearTimeout(timer);
   }, [onComplete]);
 
-  return <MobileFrame className="intro-screen">
+  return <MobileFrame showTime={false} className="intro-screen">
     <FloatingShapes />
     <div className="intro-wax-drop" aria-hidden="true" />
     <div className="intro-stamp"><BlueSeal variant="stamp" /></div>
