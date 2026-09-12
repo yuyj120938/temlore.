@@ -10,6 +10,23 @@ import { ensureDemoUser } from './auth';
 import { mountLetterRoutes } from './letter-routes';
 import { sealLetter, readableLetter } from './sealing';
 import { serverNow } from './time';
+import { randomBytes } from 'node:crypto';
+
+const resetTokens = new Map<string, { email: string; expiresAt: number }>();
+app.post('/api/auth/password-reset', async (req, res) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'INVALID_EMAIL' });
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  if (!apiKey) return res.status(503).json({ error: 'RESEND_NOT_CONFIGURED' });
+  const token = randomBytes(32).toString('hex');
+  resetTokens.set(token, { email, expiresAt: Date.now() + 15 * 60 * 1000 });
+  const origin = process.env.APP_ORIGIN || `http://localhost:${port}`;
+  const resetUrl = `${origin}/?reset=${token}`;
+  const response = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to: [email], subject: 'Temlore 密码重置', html: `<p>你好，</p><p>请点击下面的链接设置新的 Temlore 密码：</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>链接 15 分钟内有效。如非本人操作，请忽略此邮件。</p>` }) });
+  if (!response.ok) return res.status(502).json({ error: 'RESEND_SEND_FAILED' });
+  return res.json({ ok: true, resetUrl: process.env.NODE_ENV === 'production' ? undefined : resetUrl });
+});
 mountAuthRoutes(app, db);
 ensureDemoUser(db);
 mountLetterRoutes(app, db);
