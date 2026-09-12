@@ -8,5 +8,5 @@ test('intro settles into home and Sign opens the revised login', async ({ page }
   await expect(sign).toBeVisible();
   await sign.click();
   await expect(page.getByText('SIGN IN')).toBeVisible();
-  await expect(page.getByText('用户', { exact: true })).toBeVisible();
+  await expect(page.getByText('邮箱', { exact: true })).toBeVisible();
 });

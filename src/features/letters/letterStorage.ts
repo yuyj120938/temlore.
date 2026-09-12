@@ -5,7 +5,7 @@ type RawLetter = LetterMeta & Record<string, unknown>;
 export type StoredLetter = EditorDraft & LetterMeta;
 
 export function getActivePhone() {
-  try { return (JSON.parse(localStorage.getItem('temlore.session') || '{}') as { phone?: string }).phone || ''; }
+  try { return (JSON.parse(localStorage.getItem('temlore.session') || '{}') as { email?: string; phone?: string }).email || ''; }
   catch { return ''; }
 }
 

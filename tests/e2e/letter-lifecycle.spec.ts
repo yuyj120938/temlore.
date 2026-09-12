@@ -10,7 +10,7 @@ test('writes text around a photo and opens it in the same order', async ({ page 
   await page.setViewportSize({ width: 393, height: 852 });
   await page.addInitScript(() => {
     localStorage.clear();
-    localStorage.setItem('temlore.session', JSON.stringify({ phone: '13800138000' }));
+    localStorage.setItem('temlore.session', JSON.stringify({ email: 'one@example.com' }));
   });
   await page.goto('/');
   await page.getByText('Start writing').waitFor({ timeout: 6000 });
@@ -34,7 +34,7 @@ test('writes text around a photo and opens it in the same order', async ({ page 
   await page.getByText('确认封存时间').click();
   await page.getByText('Start writing').waitFor({ timeout: 8000 });
   await page.getByText('A letter has arrived.').waitFor({ timeout: 15000 });
-  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('temlore.letters.13800138000') || '[]')[0]);
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('temlore.letters.one@example.com') || '[]')[0]);
   expect(stored.blocks.map((block: { type: string }) => block.type)).toEqual(['text', 'photo', 'text']);
   expect(stored).not.toHaveProperty('body');
   await page.getByRole('button', { name: '打开抽屉' }).click({ force: true });

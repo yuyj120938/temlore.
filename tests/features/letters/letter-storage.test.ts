@@ -5,11 +5,11 @@ describe('phone-scoped letter storage', () => {
   beforeEach(() => localStorage.clear());
 
   it('keeps a new phone history empty and separates accounts', () => {
-    localStorage.setItem('temlore.session', JSON.stringify({ phone: '13800138000' }));
-    expect(getActivePhone()).toBe('13800138000');
-    saveLetter('13800138000', { id: 'one', font: 'songti', blocks: [{ id: 'text', type: 'text', text: '第一封' }], writtenAt: '2026-08-23T10:00:00.000Z', unlockAt: 1, arrived: true });
-    expect(loadLetters('13800138000')).toHaveLength(1);
-    expect(loadLetters('13900139000')).toEqual([]);
+    localStorage.setItem('temlore.session', JSON.stringify({ email: 'one@example.com' }));
+    expect(getActivePhone()).toBe('one@example.com');
+    saveLetter('one@example.com', { id: 'one', font: 'songti', blocks: [{ id: 'text', type: 'text', text: '第一封' }], writtenAt: '2026-08-23T10:00:00.000Z', unlockAt: 1, arrived: true });
+    expect(loadLetters('one@example.com')).toHaveLength(1);
+    expect(loadLetters('two@example.com')).toEqual([]);
   });
 
   it('round-trips the complete finalized photo snapshot', () => {
