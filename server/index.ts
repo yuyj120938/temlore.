@@ -4,7 +4,6 @@ import { createDatabase } from './db';
 
 const app = express();
 const port = Number(process.env.PORT ?? 4174);
-const db = createDatabase(process.env.TEMLORE_DB ?? ':memory:');
 app.use(express.json());
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
@@ -30,19 +29,28 @@ app.post('/api/auth/password-reset', async (req, res) => {
   if (!response.ok) return res.status(502).json({ error: 'RESEND_SEND_FAILED' });
   return res.json({ ok: true, resetUrl: process.env.NODE_ENV === 'production' ? undefined : resetUrl });
 });
-mountAuthRoutes(app, db);
-ensureDemoUser(db);
-mountLetterRoutes(app, db);
-app.post('/api/letters/:id/seal', (req, res) => { try { return res.json(sealLetter(db, Number(req.params.id), Number(req.body.userId), req.body.duration, req.body.customOpensAt)); } catch { return res.status(409).json({ error: 'LETTER_NOT_SEALABLE' }); } });
-app.get('/api/letters/:id/read', (req, res) => { try { return res.json(readableLetter(db, Number(req.params.id), Number(req.query.userId))); } catch (error) { return res.status((error as Error).message === 'LETTER_LOCKED' ? 423 : 404).json({ error: (error as Error).message }); } });
 app.get('/api/time', (_req, res) => res.json({ now: serverNow().toISOString() }));
-app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'temlore', now: new Date().toISOString() }));
+let databaseReady = false;
+app.get('/api/health', (_req, res) => res.status(databaseReady ? 200 : 503).json({ ok: databaseReady, service: 'temlore', now: new Date().toISOString() }));
 app.use((req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/api/')) return res.sendFile(path.join(distPath, 'index.html'));
   return next();
 });
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Temlore service listening on port ${port}`);
+  try {
+    const db = createDatabase(process.env.TEMLORE_DB ?? ':memory:');
+    mountAuthRoutes(app, db);
+    ensureDemoUser(db);
+    mountLetterRoutes(app, db);
+    app.post('/api/letters/:id/seal', (req, res) => { try { return res.json(sealLetter(db, Number(req.params.id), Number(req.body.userId), req.body.duration, req.body.customOpensAt)); } catch { return res.status(409).json({ error: 'LETTER_NOT_SEALABLE' }); } });
+    app.get('/api/letters/:id/read', (req, res) => { try { return res.json(readableLetter(db, Number(req.params.id), Number(req.query.userId))); } catch (error) { return res.status((error as Error).message === 'LETTER_LOCKED' ? 423 : 404).json({ error: (error as Error).message }); } });
+    databaseReady = true;
+    console.log('Temlore database and routes ready');
+  } catch (error) {
+    console.error('Temlore database failed to initialize:', error);
+    process.exitCode = 1;
+  }
 });
 server.on('error', (error) => {
   console.error('Temlore service failed to start:', error);
