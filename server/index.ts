@@ -1,16 +1,11 @@
 import express from 'express';
 import path from 'node:path';
-import { createDatabase } from './db';
 
 const app = express();
 const port = Number(process.env.PORT ?? 4174);
 app.use(express.json());
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
-import { mountAuthRoutes } from './auth-routes';
-import { ensureDemoUser } from './auth';
-import { mountLetterRoutes } from './letter-routes';
-import { sealLetter, readableLetter } from './sealing';
 import { serverNow } from './time';
 import { randomBytes } from 'node:crypto';
 
@@ -36,9 +31,16 @@ app.use((req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/api/')) return res.sendFile(path.join(distPath, 'index.html'));
   return next();
 });
-const server = app.listen(port, '0.0.0.0', () => {
+const server = app.listen(port, '0.0.0.0', async () => {
   console.log(`Temlore service listening on port ${port}`);
   try {
+    const [{ createDatabase }, { mountAuthRoutes }, { ensureDemoUser }, { mountLetterRoutes }, { sealLetter, readableLetter }] = await Promise.all([
+      import('./db'),
+      import('./auth-routes'),
+      import('./auth'),
+      import('./letter-routes'),
+      import('./sealing'),
+    ]);
     const db = createDatabase(process.env.TEMLORE_DB ?? ':memory:');
     mountAuthRoutes(app, db);
     ensureDemoUser(db);
