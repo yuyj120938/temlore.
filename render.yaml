@@ -3,7 +3,7 @@ services:
     name: temlore
     runtime: node
     buildCommand: pnpm install --frozen-lockfile && pnpm build
-    startCommand: pnpm server
+    startCommand: pnpm exec tsx server/index.ts
     healthCheckPath: /api/health
     envVars:
       - key: RESEND_API_KEY
