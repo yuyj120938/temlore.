@@ -41,4 +41,10 @@ app.use((req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/api/')) return res.sendFile(path.join(distPath, 'index.html'));
   return next();
 });
-app.listen(port, () => console.log(`Temlore service listening on http://localhost:${port}`));
+const server = app.listen(port, '0.0.0.0', () => {
+  console.log(`Temlore service listening on port ${port}`);
+});
+server.on('error', (error) => {
+  console.error('Temlore service failed to start:', error);
+  process.exitCode = 1;
+});
