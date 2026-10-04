@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'node:path';
 
 const app = express();
-const port = Number(process.env.PORT ?? 4174);
+const port = Number(process.env.PORT || 3000);
 app.use(express.json());
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
