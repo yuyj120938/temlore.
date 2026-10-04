@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
-    "better-sqlite3": "latest",
     "express": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -25,7 +24,6 @@
     "@playwright/test": "latest",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
-    "@types/better-sqlite3": "latest",
     "@types/express": "latest",
     "@types/node": "latest",
     "@types/react": "latest",

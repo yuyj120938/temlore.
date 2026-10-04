@@ -1,5 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import type Database from 'better-sqlite3';
+import type { Database } from './db';
 
 export function hashSecret(secret: string) {
   const salt = randomBytes(16).toString('hex');
@@ -13,7 +13,7 @@ export function verifySecret(secret: string, stored: string) {
   return timingSafeEqual(actual, Buffer.from(digest, 'hex'));
 }
 
-export function register(db: Database.Database, phone: string, password: string) {
+export function register(db: Database, phone: string, password: string) {
   if (!/^1\d{10}$/.test(phone) || password.length < 8) throw new Error('INVALID_INPUT');
   const recoveryCode = `${randomBytes(4).toString('hex').toUpperCase()}-${randomBytes(4).toString('hex').toUpperCase()}`;
   const now = new Date().toISOString();
@@ -21,13 +21,13 @@ export function register(db: Database.Database, phone: string, password: string)
   return { id: Number(result.lastInsertRowid), recoveryCode };
 }
 
-export function authenticate(db: Database.Database, phone: string, password: string) {
+export function authenticate(db: Database, phone: string, password: string) {
   const user = db.prepare('SELECT id,password_hash FROM users WHERE phone = ?').get(phone) as { id: number; password_hash: string } | undefined;
   if (!user || !verifySecret(password, user.password_hash)) throw new Error('INVALID_CREDENTIALS');
   return { id: user.id };
 }
 
-export function rotateRecovery(db: Database.Database, phone: string, code: string) {
+export function rotateRecovery(db: Database, phone: string, code: string) {
   const user = db.prepare('SELECT id,recovery_hash FROM users WHERE phone = ?').get(phone) as { id: number; recovery_hash: string } | undefined;
   if (!user || !verifySecret(code, user.recovery_hash)) throw new Error('INVALID_RECOVERY');
   const next = randomBytes(8).toString('hex').toUpperCase();
@@ -35,7 +35,7 @@ export function rotateRecovery(db: Database.Database, phone: string, code: strin
   return next;
 }
 
-export function ensureDemoUser(db: Database.Database) {
+export function ensureDemoUser(db: Database) {
   const phone = '13800138000';
   const existing = db.prepare('SELECT id FROM users WHERE phone = ?').get(phone) as { id: number } | undefined;
   if (existing) return existing.id;
