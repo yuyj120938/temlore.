@@ -12,3 +12,7 @@ services:
         value: onboarding@resend.dev
       - key: APP_ORIGIN
         sync: false
+      - key: TEMLORE_DB
+        value: ':memory:'
+      - key: NODE_ENV
+        value: production
